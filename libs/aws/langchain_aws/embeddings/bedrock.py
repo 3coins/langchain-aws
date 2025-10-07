@@ -127,7 +127,15 @@ class BedrockEmbeddings(BaseModel, Embeddings):
     @property
     def _inferred_provider(self) -> str:
         """Inferred provider of the model."""
-        return self.provider or self.model_id.split(".")[0]
+        if self.provider:
+            return self.provider
+        
+        # Handle different model ID formats
+        if "cohere" in self.model_id.lower():
+            return "cohere"
+        else:
+            # Default to first part before dot for standard format
+            return self.model_id.split(".")[0]
 
     @model_validator(mode="after")
     def validate_environment(self) -> Self:
@@ -163,7 +171,7 @@ class BedrockEmbeddings(BaseModel, Embeddings):
                     "texts": [text],
                 }
             )
-            return response_body.get("embeddings")[0]
+            return self._extract_cohere_embedding(response_body.get("embeddings"), 0)
         else:
             # includes common provider == "amazon"
             response_body = self._invoke_model(
@@ -179,16 +187,38 @@ class BedrockEmbeddings(BaseModel, Embeddings):
 
         # Iterate through the list of strings in batches
         for text_batch in _batch_cohere_embedding_texts(texts):
-            batch_embeddings = self._invoke_model(
+            response_embeddings = self._invoke_model(
                 input_body={
                     "input_type": "search_document",
                     "texts": text_batch,
                 }
             ).get("embeddings")
 
+            batch_embeddings = self._extract_cohere_embeddings(response_embeddings)
             results += batch_embeddings
 
         return results
+
+    def _extract_cohere_embeddings(self, embeddings_data: Any) -> List[List[float]]:
+        """Extract embeddings from Cohere response, handling both v3 and v4 formats."""
+        if isinstance(embeddings_data, list):
+            # Cohere Embed v3 format: {"embeddings": [[...]]}
+            return embeddings_data
+        elif isinstance(embeddings_data, dict):
+            # Cohere Embed v4 format: {"embeddings": {"float": [[...]]}}
+            # Default to "float" type if available, otherwise take the first available type
+            if "float" in embeddings_data:
+                return embeddings_data["float"]
+            else:
+                # Take the first available embedding type
+                return list(embeddings_data.values())[0]
+        else:
+            raise ValueError(f"Unexpected embeddings format: {type(embeddings_data)}")
+
+    def _extract_cohere_embedding(self, embeddings_data: Any, index: int) -> List[float]:
+        """Extract a single embedding from Cohere response, handling both v3 and v4 formats."""
+        embeddings_list = self._extract_cohere_embeddings(embeddings_data)
+        return embeddings_list[index]
 
     def _invoke_model(self, input_body: Dict[str, Any] = {}) -> Dict[str, Any]:
         if self.model_kwargs:

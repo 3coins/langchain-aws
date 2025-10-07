@@ -34,6 +34,13 @@ def cohere_embeddings_model_arn() -> BedrockEmbeddings:
     )
 
 
+@pytest.fixture
+def cohere_embeddings_v4() -> BedrockEmbeddings:
+    return BedrockEmbeddings(
+        model_id="us.cohere.embed-v4:0",
+    )
+
+
 @pytest.mark.scheduled
 def test_bedrock_embedding_documents(bedrock_embeddings) -> None:
     documents = ["foo bar"]
@@ -176,3 +183,67 @@ def test_bedrock_embedding_provider_arg(
     assert bedrock_embeddings._inferred_provider == "amazon"
     assert cohere_embeddings_v3._inferred_provider == "cohere"
     assert cohere_embeddings_model_arn._inferred_provider == "cohere"
+
+
+@pytest.mark.scheduled
+def test_bedrock_cohere_v4_embedding_documents(cohere_embeddings_v4) -> None:
+    """Test Cohere v4 embeddings with single document."""
+    documents = ["foo bar"]
+    output = cohere_embeddings_v4.embed_documents(documents)
+    assert len(output) == 1
+    # Cohere v4 default dimension is 1536 (configurable 256-1536)
+    assert len(output[0]) == 1536
+
+
+@pytest.mark.scheduled
+def test_bedrock_cohere_v4_embedding_documents_multiple(cohere_embeddings_v4) -> None:
+    """Test Cohere v4 embeddings with multiple documents."""
+    documents = ["foo bar", "bar foo", "foo"]
+    output = cohere_embeddings_v4.embed_documents(documents)
+    assert len(output) == 3
+    assert len(output[0]) == 1536
+    assert len(output[1]) == 1536
+    assert len(output[2]) == 1536
+
+
+@pytest.mark.scheduled
+def test_bedrock_cohere_v4_embedding_query(cohere_embeddings_v4) -> None:
+    """Test Cohere v4 single query embedding."""
+    document = "foo bar"
+    output = cohere_embeddings_v4.embed_query(document)
+    assert len(output) == 1536
+
+
+@pytest.mark.scheduled
+def test_bedrock_cohere_v4_embedding_large_document_set(cohere_embeddings_v4) -> None:
+    """Test Cohere v4 embeddings with large document set to verify batching works."""
+    lots_of_documents = 200
+    documents = [f"text_{val}" for val in range(lots_of_documents)]
+    output = cohere_embeddings_v4.embed_documents(documents)
+    assert len(output) == 200
+    assert len(output[0]) == 1536
+    assert len(output[1]) == 1536
+    assert len(output[2]) == 1536
+
+
+@pytest.mark.scheduled 
+def test_cohere_v3_vs_v4_compatibility() -> None:
+    """Test that both v3 and v4 models work with the same interface."""
+    v3_embeddings = BedrockEmbeddings(model_id="cohere.embed-english-v3")
+    v4_embeddings = BedrockEmbeddings(model_id="us.cohere.embed-v4:0")
+    
+    test_text = "This is a test document for embedding compatibility"
+    
+    # Both should work without errors
+    v3_result = v3_embeddings.embed_query(test_text)
+    v4_result = v4_embeddings.embed_query(test_text)
+    
+    # v3 outputs 1024 dimensions, v4 outputs 1536 by default
+    assert len(v3_result) == 1024
+    assert len(v4_result) == 1536
+    
+    # Both should be valid embedding vectors (non-zero, reasonable values)
+    assert all(isinstance(x, (int, float)) for x in v3_result)
+    assert all(isinstance(x, (int, float)) for x in v4_result)
+    assert any(abs(x) > 0.001 for x in v3_result)  # Not all zeros
+    assert any(abs(x) > 0.001 for x in v4_result)  # Not all zeros
