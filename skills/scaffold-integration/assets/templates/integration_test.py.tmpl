@@ -1,0 +1,62 @@
+"""Integration tests for {ClassName}.
+
+Requirements:
+    - AWS credentials with access to {ServiceName}
+    - TODO: List any provisioned resources needed
+    - Region: us-east-1 (or configure via AWS_DEFAULT_REGION)
+
+These tests are skipped in CI — they require real AWS credentials and resources.
+Run locally with: pytest tests/integration_tests/{test_file} -v
+"""
+
+import os
+
+import pytest
+
+# Skip entire module if AWS credentials are not available
+pytestmark = pytest.mark.skipif(
+    not os.environ.get("AWS_ACCESS_KEY_ID"),
+    reason="AWS credentials not available — skipping integration tests",
+)
+
+
+class Test{ClassName}Integration:
+    """Integration tests for {ClassName}."""
+
+    @pytest.fixture
+    def instance(self):
+        """Create a {ClassName} instance for testing.
+
+        TODO: Configure with real parameters.
+        """
+        # from langchain_aws import {ClassName}
+        # return {ClassName}(
+        #     region_name=os.environ.get("AWS_DEFAULT_REGION", "us-east-1"),
+        #     # TODO: Add required parameters
+        # )
+        pytest.skip("TODO: Implement fixture")
+
+    def test_invoke(self, instance) -> None:
+        """Test basic invocation against real service."""
+        # TODO: Implement with a real query
+        # result = instance.invoke("test query")
+        # assert result is not None
+        # assert len(result) > 0
+        pass
+
+    def test_invoke_with_filters(self, instance) -> None:
+        """Test invocation with filtering parameters."""
+        # TODO: Implement if the service supports filtering
+        pass
+
+    @pytest.mark.skipif(
+        not os.environ.get("TODO_RESOURCE_ID"),
+        reason="Resource not provisioned",
+    )
+    def test_with_provisioned_resource(self, instance) -> None:
+        """Test with a specific provisioned resource.
+
+        Requires: TODO_RESOURCE_ID environment variable.
+        """
+        # TODO: Implement if the integration needs provisioned infra
+        pass

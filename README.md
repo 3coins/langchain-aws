@@ -119,6 +119,34 @@ print(result.output)  # hello
 interpreter.stop()
 ```
 
+## 🤖 Agent Skills
+
+This repository includes [Agent Skills](https://agentskills.io) that help contributors work more effectively with AI coding agents. Skills provide procedural knowledge for tasks like reviewing PRs, validating contributions, and scaffolding new integrations.
+
+### Install Skills
+
+```bash
+npx skills add langchain-ai/langchain-aws
+```
+
+This works with Claude Code, Codex, Cursor, Kiro CLI, and [50+ other agents](https://skills.sh).
+
+### Available Skills
+
+| Skill | Description |
+|-------|-------------|
+| `pr-review` | AI-assisted PR review — evaluates API alignment, design decisions, repo patterns, and test adequacy |
+| `pre-submit-check` | Self-service validation before submitting a PR — checks structure, tests, and code quality |
+| `scaffold-integration` | Generate boilerplate for new AWS service integrations with proper structure and tests |
+
+### Install a Specific Skill
+
+```bash
+npx skills add langchain-ai/langchain-aws --skill pr-review
+npx skills add langchain-ai/langchain-aws --skill pre-submit-check
+npx skills add langchain-ai/langchain-aws --skill scaffold-integration
+```
+
 ## Contributing
 
 We welcome contributions to this repository! To get started, please follow the [Contributing Guide](https://github.com/langchain-ai/langchain-aws/blob/main/.github/CONTRIBUTING.md).

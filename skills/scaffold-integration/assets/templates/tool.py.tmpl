@@ -1,0 +1,93 @@
+"""Amazon {ServiceName} tool.
+
+TODO: Replace {ServiceName} with the actual AWS service name.
+
+Example usage:
+
+    .. code-block:: python
+
+        from langchain_aws.tools import {ClassName}
+
+        tool = {ClassName}(
+            # TODO: Add required parameters
+        )
+        result = tool.invoke({{"input": "..."}})
+"""
+
+from typing import Any, Optional, Type
+
+from langchain_core.callbacks import CallbackManagerForToolRun
+from langchain_core.tools import BaseTool
+from pydantic import BaseModel, Field
+
+from langchain_aws.utils import create_aws_client
+
+
+class {ClassName}Input(BaseModel):
+    """Input schema for {ClassName}.
+
+    TODO: Define the input parameters for this tool.
+    """
+
+    query: str = Field(description="TODO: Describe this parameter")
+
+
+class {ClassName}(BaseTool):
+    """Amazon {ServiceName} tool.
+
+    TODO: Add class-level documentation explaining what this tool does.
+
+    Args:
+        region_name: AWS region name.
+        credentials_profile_name: AWS credentials profile name.
+        # TODO: Add service-specific parameters
+    """
+
+    name: str = "TODO_tool_name"
+    """Tool name (used by agents to identify the tool)."""
+
+    description: str = "TODO: Describe what this tool does and when to use it."
+    """Tool description (used by agents to decide when to use the tool)."""
+
+    args_schema: Type[BaseModel] = {ClassName}Input
+    """Input schema for the tool."""
+
+    region_name: Optional[str] = None
+    """AWS region name."""
+
+    credentials_profile_name: Optional[str] = None
+    """AWS credentials profile name."""
+
+    client: Any = Field(default=None, exclude=True)
+    """Boto3 client (created automatically)."""
+
+    def __init__(self, **kwargs: Any) -> None:
+        """Initialize the tool and create boto3 client."""
+        super().__init__(**kwargs)
+        # TODO: Replace "service-name" with the actual boto3 service name
+        self.client = create_aws_client(
+            "service-name",
+            region_name=self.region_name,
+            credentials_profile_name=self.credentials_profile_name,
+        )
+
+    def _run(
+        self,
+        query: str,
+        *,
+        run_manager: Optional[CallbackManagerForToolRun] = None,
+    ) -> str:
+        """Execute the tool.
+
+        Args:
+            query: The input query.
+            run_manager: Callback manager for the tool run.
+
+        Returns:
+            Tool output as a string.
+        """
+        # TODO: Implement the tool logic
+        # Example:
+        # response = self.client.some_operation(input=query)
+        # return response["output"]
+        raise NotImplementedError("TODO: Implement tool logic")

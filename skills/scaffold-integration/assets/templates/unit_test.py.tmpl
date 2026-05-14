@@ -1,0 +1,80 @@
+"""Unit tests for {ClassName}.
+
+Tests use mocked boto3 responses — no network calls.
+"""
+
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+
+class Test{ClassName}:
+    """Tests for {ClassName}."""
+
+    @patch("langchain_aws.{module_path}.create_aws_client")
+    def test_init(self, mock_create_client: MagicMock) -> None:
+        """Test initialization creates boto3 client."""
+        # TODO: Import your class
+        # from langchain_aws import {ClassName}
+        #
+        # instance = {ClassName}(region_name="us-east-1")
+        # mock_create_client.assert_called_once_with(
+        #     "service-name", region_name="us-east-1", credentials_profile_name=None
+        # )
+        pass
+
+    @patch("langchain_aws.{module_path}.create_aws_client")
+    def test_invoke_success(self, mock_create_client: MagicMock) -> None:
+        """Test successful invocation with mocked response."""
+        mock_client = MagicMock()
+        mock_create_client.return_value = mock_client
+
+        # TODO: Mock the API response
+        # mock_client.some_operation.return_value = {
+        #     "results": [{"text": "result 1", "score": 0.9}]
+        # }
+        #
+        # from langchain_aws import {ClassName}
+        # instance = {ClassName}(region_name="us-east-1")
+        # result = instance.invoke("test query")
+        #
+        # assert len(result) == 1
+        # mock_client.some_operation.assert_called_once()
+        pass
+
+    @patch("langchain_aws.{module_path}.create_aws_client")
+    def test_invoke_empty_response(self, mock_create_client: MagicMock) -> None:
+        """Test handling of empty response."""
+        mock_client = MagicMock()
+        mock_create_client.return_value = mock_client
+
+        # TODO: Mock an empty response
+        # mock_client.some_operation.return_value = {"results": []}
+        #
+        # from langchain_aws import {ClassName}
+        # instance = {ClassName}(region_name="us-east-1")
+        # result = instance.invoke("test query")
+        #
+        # assert result == []
+        pass
+
+    @patch("langchain_aws.{module_path}.create_aws_client")
+    def test_invoke_error(self, mock_create_client: MagicMock) -> None:
+        """Test handling of API errors."""
+        from botocore.exceptions import ClientError
+
+        mock_client = MagicMock()
+        mock_create_client.return_value = mock_client
+
+        # TODO: Mock an error response
+        # mock_client.some_operation.side_effect = ClientError(
+        #     {"Error": {"Code": "ValidationException", "Message": "Invalid input"}},
+        #     "SomeOperation",
+        # )
+        #
+        # from langchain_aws import {ClassName}
+        # instance = {ClassName}(region_name="us-east-1")
+        #
+        # with pytest.raises(Exception):  # TODO: Use specific exception
+        #     instance.invoke("bad query")
+        pass

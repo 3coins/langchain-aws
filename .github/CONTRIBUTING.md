@@ -22,6 +22,22 @@ best way to get our attention.
 
 ## 🚀 Quick Start
 
+### Using Agent Skills
+
+This repository includes [Agent Skills](https://agentskills.io) that work with AI coding agents (Claude Code, Codex, Cursor, Kiro CLI, etc.) to help you contribute more effectively.
+
+**Install skills:**
+```bash
+npx skills add langchain-ai/langchain-aws
+```
+
+**Available skills:**
+- **`pre-submit-check`** — Run before submitting a PR to validate your contribution meets standards
+- **`scaffold-integration`** — Generate boilerplate when adding a new AWS service integration
+- **`pr-review`** — Used by reviewers to evaluate PRs (also useful for self-review)
+
+### Development Setup
+
 This quick start guide explains how to setup the repository locally for development.
 
 ### Dependency Management: uv and other env/dependency managers
@@ -78,6 +94,64 @@ To run the integration tests:
 
 ```bash
 make integration_test
+```
+
+### Testing Requirements
+
+Testing in this repo has multiple layers due to CI constraints. The CI environment has limited AWS access and cannot provision infrastructure, so we rely on properly structured tests:
+
+| What | Required? | Runs in CI? | Notes |
+|------|-----------|-------------|-------|
+| Unit tests (mocked) | ✅ Required | ✅ Yes | No network calls. Mock boto3 responses. |
+| Integration tests | Expected | ⚠️ Compile only | Must be properly gated (see below) |
+| Conformance tests | For chat models | ✅ Yes | LangChain standard API conformance |
+
+**Gating integration tests** — Integration tests MUST be skipped in CI. Use one of:
+
+```python
+import os
+import pytest
+
+# Option 1: Skip if no AWS credentials (preferred)
+@pytest.mark.skipif(
+    not os.environ.get("AWS_ACCESS_KEY_ID"),
+    reason="AWS credentials not available"
+)
+def test_my_integration():
+    ...
+
+# Option 2: Skip entire module
+pytestmark = pytest.mark.skipif(
+    not os.environ.get("AWS_ACCESS_KEY_ID"),
+    reason="AWS credentials not available"
+)
+
+# Option 3: For infra-dependent tests
+@pytest.mark.skipif(
+    not os.environ.get("MY_RESOURCE_ID"),
+    reason="Resource not provisioned"
+)
+def test_with_infra():
+    ...
+```
+
+**Why can't integration tests run in CI?**
+- The CI AWS account (owned by LangChain team) has limited model access
+- Infrastructure (DynamoDB, Neptune, AgentCore, etc.) cannot be provisioned in CI
+- Provider-specific tests (Anthropic via Bedrock, etc.) require model enablement
+
+**Running integration tests locally:**
+```bash
+# Configure AWS credentials
+export AWS_ACCESS_KEY_ID=...
+export AWS_SECRET_ACCESS_KEY=...
+export AWS_DEFAULT_REGION=us-east-1
+
+# Run all integration tests
+make integration_test
+
+# Run a specific test
+uv run --group test_integration pytest tests/integration_tests/chat_models/test_bedrock_converse.py -v
 ```
 
 ### Code Coverage

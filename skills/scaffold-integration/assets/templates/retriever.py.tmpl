@@ -1,0 +1,101 @@
+"""Amazon {ServiceName} retriever.
+
+TODO: Replace {ServiceName} with the actual AWS service name.
+TODO: Update the module docstring with usage examples.
+
+Example usage:
+
+    .. code-block:: python
+
+        from langchain_aws import {ClassName}
+
+        retriever = {ClassName}(
+            # TODO: Add required parameters
+        )
+        docs = retriever.invoke("search query")
+"""
+
+from typing import Any, List, Optional
+
+from langchain_core.callbacks import CallbackManagerForRetrieverRun
+from langchain_core.documents import Document
+from langchain_core.retrievers import BaseRetriever
+from pydantic import Field, model_validator
+
+from langchain_aws.utils import create_aws_client
+
+
+class {ClassName}(BaseRetriever):
+    """Amazon {ServiceName} retriever.
+
+    TODO: Add class-level documentation explaining what this retriever does,
+    what AWS service it wraps, and any prerequisites (IAM permissions, etc.).
+
+    Setup:
+        Install ``langchain-aws`` and configure AWS credentials:
+
+        .. code-block:: bash
+
+            pip install langchain-aws
+
+    Args:
+        region_name: AWS region name.
+        credentials_profile_name: AWS credentials profile name.
+        # TODO: Add service-specific parameters
+
+    Example:
+        .. code-block:: python
+
+            from langchain_aws import {ClassName}
+
+            retriever = {ClassName}(
+                region_name="us-east-1",
+                # TODO: Add example parameters
+            )
+            docs = retriever.invoke("search query")
+    """
+
+    # TODO: Add service-specific fields
+    region_name: Optional[str] = None
+    """AWS region name."""
+
+    credentials_profile_name: Optional[str] = None
+    """AWS credentials profile name."""
+
+    client: Any = Field(default=None, exclude=True)
+    """Boto3 client (created automatically)."""
+
+    @model_validator(mode="after")
+    def validate_environment(self) -> "{{ClassName}}":
+        """Create boto3 client."""
+        # TODO: Replace "service-name" with the actual boto3 service name
+        self.client = create_aws_client(
+            "service-name",
+            region_name=self.region_name,
+            credentials_profile_name=self.credentials_profile_name,
+        )
+        return self
+
+    def _get_relevant_documents(
+        self,
+        query: str,
+        *,
+        run_manager: CallbackManagerForRetrieverRun,
+    ) -> List[Document]:
+        """Retrieve documents relevant to the query.
+
+        Args:
+            query: The search query string.
+            run_manager: Callback manager for the retriever run.
+
+        Returns:
+            List of relevant documents.
+        """
+        # TODO: Implement the retrieval logic
+        # Example:
+        # response = self.client.search(query=query, ...)
+        # return [
+        #     Document(page_content=item["text"], metadata={...})
+        #     for item in response["results"]
+        # ]
+        raise NotImplementedError("TODO: Implement retrieval logic")
