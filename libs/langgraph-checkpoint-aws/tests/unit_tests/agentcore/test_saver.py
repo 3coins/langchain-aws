@@ -14,8 +14,8 @@ from botocore.exceptions import ClientError
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 from langchain_core.runnables import RunnableConfig
 from langgraph.checkpoint.base import Checkpoint, CheckpointMetadata, CheckpointTuple
+from langgraph.checkpoint.serde import types as _serde_types
 from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
-from langgraph.checkpoint.serde.types import _DeltaSnapshot
 from langgraph.constants import TASKS
 
 from langgraph_checkpoint_aws.checkpoint.agentcore.constants import (
@@ -37,6 +37,15 @@ from langgraph_checkpoint_aws.checkpoint.agentcore.models import (
     WritesEvent,
 )
 from langgraph_checkpoint_aws.checkpoint.agentcore.saver import AgentCoreMemorySaver
+
+# ``_DeltaSnapshot`` only exists on newer langgraph-checkpoint releases, while the
+# package still supports ``langgraph-checkpoint>=3.0.0``. Resolve it defensively so
+# collection does not fail on versions that predate it.
+_DeltaSnapshot = getattr(_serde_types, "_DeltaSnapshot", None)
+requires_delta_snapshot = pytest.mark.skipif(
+    _DeltaSnapshot is None,
+    reason="requires a langgraph-checkpoint version that ships _DeltaSnapshot",
+)
 
 # Configure pytest to use anyio for async tests
 pytestmark = pytest.mark.anyio
@@ -1702,6 +1711,7 @@ class TestEventProcessor:
         assert len(tuple_result.pending_writes) == 1
         assert tuple_result.checkpoint["channel_values"]["default"] == "test_value"
 
+    @requires_delta_snapshot
     def test_build_checkpoint_tuple_does_not_patch_delta_snapshot_seed(
         self,
         processor,
